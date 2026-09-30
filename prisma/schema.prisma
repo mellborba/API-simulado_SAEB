@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Palestrante {
+  id      Int      @id @default(autoincrement())
+  nome    String
+  email   String   @unique
+  eventos Evento[]
+}
+
+model Evento {
+  id           Int           @id @default(autoincrement())
+  nomeEvento   String
+  descricao    String
+  local        String
+  palestrantes Palestrante[]
+}
