@@ -29,22 +29,39 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-// PUT /eventos/:id -> Alterar informações do evento
+// PUT /eventos/:id -> Alterar informações do evento E atualizar o palestrante vinculado
 router.put('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { nomeEvento, descricao, local } = req.body;
+  const { nomeEvento, descricao, local, palestranteId } = req.body;
 
   if (!nomeEvento || !descricao || !local) {
     return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
   }
 
   try {
+    // Monta o objeto de atualização
+    const dataToUpdate: any = {
+      nomeEvento,
+      descricao,
+      local
+    };
+
+    // Se o palestranteId for enviado, substitui (set) o vínculo antigo pelo novo
+    if (palestranteId) {
+      dataToUpdate.palestrantes = {
+        set: [{ id: Number(palestranteId) }]
+      };
+    }
+
     const eventoAtualizado = await prisma.evento.update({
       where: { id: Number(id) },
-      data: { nomeEvento, descricao, local }
+      data: dataToUpdate,
+      include: { palestrantes: true }
     });
+
     return res.json(eventoAtualizado);
   } catch (error) {
+    console.error(error);
     return res.status(400).json({ error: 'Erro ao atualizar evento.' });
   }
 });
